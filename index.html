@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HackerMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ECEBFF; --surface:#FFFFFF; --ink:#16123A; --muted:#5B5680; --line:#D6D3F5;
+  --cobalt:#3440F5; --cobalt-ink:#FFFFFF; --coral:#FF5A76; --marigold:#FFC23D; --dot:#B7B3E6;
+  --chip:#F6F5FF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#15122E; --surface:#1F1B45; --ink:#EEECFF; --muted:#A7A2D6; --line:#34306A;
+    --cobalt:#7F87FF; --cobalt-ink:#0E0C24; --coral:#FF7A91; --marigold:#FFCF5C; --dot:#4A457F;
+    --chip:#262153; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15122E; --surface:#1F1B45; --ink:#EEECFF; --muted:#A7A2D6; --line:#34306A;
+  --cobalt:#7F87FF; --cobalt-ink:#0E0C24; --coral:#FF7A91; --marigold:#FFCF5C; --dot:#4A457F;
+  --chip:#262153; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.6 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.5rem)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px;border-radius:6px}
+.display{font-family:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif}
+
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 0}
+.brand{display:flex;align-items:center;gap:.55rem;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.02em;text-decoration:none}
+.brand svg{width:26px;height:26px}
+.sync{font-size:.85rem;color:var(--muted)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.5rem,4vw,3.5rem);align-items:center;padding:clamp(1.5rem,5vw,4rem) 0 clamp(2rem,5vw,3.5rem)}
+.hero h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-variation-settings:"wdth" 78,"opsz" 96;font-weight:800;font-size:clamp(3rem,8.4vw,6.4rem);line-height:.9;letter-spacing:-.035em;margin:0 0 1.25rem}
+.hero p.lede{font-size:1.2rem;max-width:34ch;color:var(--muted);margin:0 0 1.75rem}
+.btn{appearance:none;border:0;cursor:pointer;font:600 1.05rem "Instrument Sans",system-ui,sans-serif;padding:.95rem 1.5rem;border-radius:999px;background:var(--cobalt);color:var(--cobalt-ink);transition:transform .15s ease,box-shadow .15s ease;text-decoration:none;display:inline-flex;align-items:center;gap:.5rem}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 -2px color-mix(in srgb,var(--cobalt) 30%,transparent)}
+.btn:active{transform:none;box-shadow:none}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 2px var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+.crowd{position:relative;background:var(--surface);border-radius:28px;aspect-ratio:1/1;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.crowd canvas{position:absolute;inset:0;width:100%;height:100%}
+.crowd figcaption{position:absolute;left:1.25rem;right:1.25rem;bottom:1.1rem;font-size:.95rem;line-height:1.4;color:var(--muted)}
+.crowd figcaption strong{color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:1.35rem;display:block;letter-spacing:-.01em;transition:opacity .4s}
+.you-key{display:inline-flex;align-items:center;gap:.4rem}
+.you-key i{width:10px;height:10px;border-radius:50%;background:var(--coral);display:inline-block}
+
+/* form */
+.panel{background:var(--surface);border-radius:28px;padding:clamp(1.4rem,4vw,2.75rem);box-shadow:0 0 0 1px var(--line);margin-bottom:3rem}
+.panel h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.025em;line-height:1;margin:0 0 .5rem}
+.panel > p{color:var(--muted);margin:0 0 2rem;max-width:56ch}
+.q{display:grid;grid-template-columns:3rem 1fr;gap:0 1rem;padding:1.5rem 0;border-top:1px solid var(--line)}
+.q .n{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:2rem;line-height:1;color:var(--cobalt)}
+.q legend,.q h3{font-weight:600;font-size:1.15rem;margin:0 0 .25rem;padding:0}
+.q .hint{color:var(--muted);font-size:.93rem;margin:0 0 1rem}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:.55rem}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;gap:.45rem;padding:.6rem 1rem;border-radius:999px;background:var(--chip);box-shadow:inset 0 0 0 1.5px var(--line);font-weight:500;font-size:.98rem;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s;user-select:none}
+.chip span b{font-weight:400;font-size:1.05rem}
+.chip input:hover + span{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip input:checked + span{background:var(--ink);color:var(--bg);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.chip input:focus-visible + span{outline:3px solid var(--cobalt);outline-offset:3px}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.tile span{flex-direction:column;align-items:flex-start;border-radius:18px;padding:1rem 1.1rem;width:100%;gap:.15rem}
+.tile span em{font-style:normal;font-weight:400;font-size:.87rem;opacity:.75}
+.tile{display:flex}
+.submit-row{display:flex;flex-wrap:wrap;align-items:center;gap:1rem;padding-top:1.75rem;border-top:1px solid var(--line)}
+.submit-row .note{color:var(--muted);font-size:.92rem}
+
+/* results */
+#results{scroll-margin-top:1rem;margin-bottom:4rem}
+.res-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1rem;margin-bottom:1.5rem}
+.res-head h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-variation-settings:"wdth" 82;font-weight:800;font-size:clamp(2.2rem,5.5vw,3.6rem);letter-spacing:-.03em;line-height:.95;margin:0}
+.res-head p{margin:.4rem 0 0;color:var(--muted)}
+.res-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.cards{display:grid;gap:1rem;list-style:none;margin:0;padding:0}
+.card{display:grid;grid-template-columns:auto 1fr 250px;gap:1.25rem 1.75rem;background:var(--surface);border-radius:24px;padding:1.5rem 1.75rem;box-shadow:0 0 0 1px var(--line);opacity:0;transform:translateY(14px) scale(.985)}
+.card.in{opacity:1;transform:none;transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){.card{opacity:1;transform:none}.card.in{transition:none}}
+.rank{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:2.6rem;line-height:.9;color:var(--cobalt);min-width:2.2rem}
+.card h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:700;font-size:1.55rem;letter-spacing:-.015em;line-height:1.1;margin:0 0 .3rem}
+.card h3 a{text-decoration:none}
+.card h3 a:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.tagline{color:var(--muted);margin:0 0 .9rem;max-width:60ch}
+.odds{display:inline-block;font-weight:600;font-size:.85rem;padding:.25rem .7rem;border-radius:999px;margin-bottom:.9rem}
+.odds.great{background:color-mix(in srgb,var(--coral) 18%,transparent);color:var(--coral)}
+.odds.good{background:color-mix(in srgb,var(--marigold) 26%,transparent);color:color-mix(in srgb,var(--marigold) 45%,var(--ink))}
+.odds.fair{background:var(--chip);color:var(--muted)}
+.why{margin:0;padding:0;list-style:none;display:grid;gap:.4rem;font-size:.97rem}
+.why li{display:grid;grid-template-columns:1.1rem 1fr;gap:.4rem}
+.why li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cobalt);margin-top:.62em}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:.65rem 1rem;margin:1rem 0 0;font-size:.92rem}
+.facts dt{color:var(--muted);font-size:.8rem}
+.facts dd{margin:0;font-weight:600}
+.side{display:flex;flex-direction:column;gap:.75rem}
+.field{background:var(--chip);border-radius:16px;padding:.9rem}
+.field svg{display:block;width:100%;height:auto}
+.field p{margin:.55rem 0 0;font-size:.8rem;color:var(--muted);line-height:1.35}
+.side .btn{justify-content:center;font-size:.98rem;padding:.8rem 1.2rem}
+.empty{background:var(--surface);border-radius:24px;padding:2rem;box-shadow:0 0 0 1px var(--line)}
+
+footer{border-top:1px solid var(--line);padding:1.75rem 0 2.5rem;color:var(--muted);font-size:.9rem}
+footer p{margin:.2rem 0;max-width:70ch}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .crowd{aspect-ratio:4/3}
+  .card{grid-template-columns:auto 1fr}
+  .side{grid-column:1 / -1}
+  .side{display:grid;grid-template-columns:1fr auto;align-items:center}
+}
+@media (max-width:560px){
+  .tiles{grid-template-columns:1fr}
+  .q{grid-template-columns:1fr}
+  .q .n{font-size:1.4rem;margin-bottom:.4rem}
+  .card{grid-template-columns:1fr;padding:1.3rem}
+  .rank{font-size:2rem}
+  .side{grid-template-columns:1fr}
+  .sync{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" aria-label="HackerMatch home">
+      <svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="6" cy="6" r="3" fill="var(--dot)"/><circle cx="13" cy="6" r="3" fill="var(--dot)"/><circle cx="20" cy="6" r="3" fill="var(--dot)"/><circle cx="6" cy="13" r="3" fill="var(--dot)"/><circle cx="13" cy="13" r="3.6" fill="var(--coral)"/><circle cx="20" cy="13" r="3" fill="var(--dot)"/><circle cx="6" cy="20" r="3" fill="var(--dot)"/><circle cx="13" cy="20" r="3" fill="var(--dot)"/><circle cx="20" cy="20" r="3" fill="var(--dot)"/></svg>
+      HackerMatch
+    </a>
+    <span class="sync">Devpost listings synced Sep 28, 2026</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <h1>Find the hackathon you can actually win.</h1>
+      <p class="lede">Skip the 15,000-person mega events. Answer three questions and we'll match you with smaller, niche Devpost hackathons where your project gets noticed.</p>
+      <a class="btn" href="#match">Start matching</a>
+    </div>
+    <figure class="crowd" aria-label="Animation: a huge crowd of dots shrinks to a small field">
+      <canvas id="crowd"></canvas>
+      <figcaption>
+        <strong id="crowdTitle">A typical big hackathon</strong>
+        <span id="crowdSub">16,831 builders chasing the same prizes.</span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="panel" id="match">
+    <h2>Three questions</h2>
+    <p>We score every open hackathon on Devpost by field size, prize pool, and fit, then keep the five where you stand out.</p>
+
+    <form id="form" novalidate>
+      <div class="q">
+        <span class="n" aria-hidden="true">1</span>
+        <fieldset>
+          <legend>What do you want to build?</legend>
+          <p class="hint">Pick as many as you like.</p>
+          <div class="chips" id="interests"></div>
+        </fieldset>
+      </div>
+
+      <div class="q">
+        <span class="n" aria-hidden="true">2</span>
+        <fieldset>
+          <legend>How much time can you give it?</legend>
+          <p class="hint">The window between kickoff and the submission deadline.</p>
+          <div class="tiles">
+            <label class="chip tile"><input type="radio" name="time" value="weekend"><span>A weekend<em>Up to 4 days, go all in</em></span></label>
+            <label class="chip tile"><input type="radio" name="time" value="short" checked><span>A week or two<em>Build in the evenings</em></span></label>
+            <label class="chip tile"><input type="radio" name="time" value="long"><span>A month or more<em>Slow and polished</em></span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="q">
+        <span class="n" aria-hidden="true">3</span>
+        <fieldset>
+          <legend>Where do you want to hack?</legend>
+          <p class="hint">In-person events often have tiny Devpost counts early on; we account for that.</p>
+          <div class="tiles">
+            <label class="chip tile"><input type="radio" name="format" value="online" checked><span>Online<em>From anywhere</em></span></label>
+            <label class="chip tile"><input type="radio" name="format" value="inperson"><span>In person<em>Travel to a venue</em></span></label>
+            <label class="chip tile"><input type="radio" name="format" value="either"><span>Either works<em>Show me the best odds</em></span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="submit-row">
+        <button class="btn" type="submit" id="go">Find my matches</button>
+        <span class="note" id="formNote">Choose at least one interest to continue.</span>
+      </div>
+    </form>
+  </section>
+
+  <section id="results" hidden aria-live="polite"></section>
+</div>
+
+<div class="wrap">
+  <footer>
+    <p>Winnability is an estimate based on Devpost registration counts, prize size, and eligibility limits. It is not a guarantee.</p>
+    <p>Listings come from <a href="https://devpost.com/hackathons">devpost.com/hackathons</a>. Always check each event's rules before joining.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Devpost snapshot (scraped Sep 28, 2026) ---------- */
+// o = online, t = tags, p = participants, usd = approx prize value, s = start, d = deadline / end
+var H = [
+ {id:"warriorhacks",n:"WarriorHacks 2.0",u:"https://warriorhacks-2-0.devpost.com/",cta:"https://warriorhacks-2-0.devpost.com/register",tag:"Open to all skill levels. Build an app, website, or game, or pitch an idea on the ideathon track.",p:524,usd:900,prize:"8 prize categories",o:1,loc:"Online",d:"2026-10-12T23:45:00-05:00",t:["ai","games","social","open"],student:1,slots:306,
+  notes:["Ideathon track means no code is required to place","Prizes go to 306 of 524 registrants, so most finishers walk away with something","Students only, so no professional teams in the field"]},
+ {id:"jagriti",n:"Jāgriti Hacks",u:"https://jagriti-hacks1.devpost.com/",tag:"Ideas for a safer tomorrow.",p:83,usd:850,prize:"$850",o:1,d:"2026-09-29T12:30:00-04:00",t:["social","security","ai"]},
+ {id:"decentra",n:"DecentraHack 2.0",u:"https://decentrahack-2-0.devpost.com/",tag:"Build what matters. Prove why it needs to exist.",p:42,usd:180,prize:"₹15,000",o:1,d:"2026-09-30T14:00:00-04:00",t:["web3"]},
+ {id:"nextbyte",n:"Next Byte Hacks: V4",u:"https://next-byte-hacks-v4.devpost.com/",tag:"Build bold, ship fast: a student-run hackathon for the next generation of builders.",p:179,usd:100,prize:"$100",o:1,d:"2026-09-30T23:45:00-04:00",t:["open"],student:1},
+ {id:"compsphere",n:"COMPSPHERE 12",u:"https://compsphere12.devpost.com/",tag:"Connect the ideas, create the future.",p:564,usd:1247,prize:"$1,247",o:1,d:"2026-09-30T13:00:00-04:00",t:["ai","web3","open"]},
+ {id:"hack2heal",n:"Hack2Heal 2.0",u:"https://hack2heal.devpost.com/",tag:"A global online healthcare innovation hackathon for every discipline.",p:838,usd:100,prize:"$100",o:1,d:"2026-09-30T14:15:00-04:00",t:["health"]},
+ {id:"kurukshetra",n:"Kurukshetra CTF",u:"https://kurukshetractf.devpost.com/",tag:"Capture the flag. Claim the battlefield.",p:25,usd:240,prize:"₹20,000",o:1,s:"2026-10-03T00:30:00-04:00",d:"2026-10-04T00:30:00-04:00",t:["security"]},
+ {id:"lovhack",n:"LovHack Season 3",u:"https://lovhack-season-3.devpost.com/",tag:"Season 3 is here. Time for your next build.",p:169,usd:250,prize:"$250",o:1,d:"2026-10-04T23:45:00-04:00",t:["open","ai"]},
+ {id:"aquahealth",n:"OneAquaHealth IEEE Global Hackathon",u:"https://oneaquahealth-ieee-hackathon.devpost.com/",tag:"Healthy waters, healthy ecosystems, healthy communities.",p:1128,usd:3500,prize:"$3,500",o:1,d:"2026-10-05T00:00:00-04:00",t:["climate","health","data"]},
+ {id:"mlempower",n:"ML Empowerment Build Challenge 3.0",u:"https://ml-build-challenge-3.devpost.com/",tag:"Learn AI and build real-world projects with mentorship.",p:393,usd:0,prize:"Non-cash prizes",o:1,d:"2026-10-06T02:45:00-04:00",t:["ai"],student:1},
+ {id:"united",n:"United Hackathons V1",u:"https://devonomicsv1.devpost.com/",tag:"A network of student-led hackathons. Requires a quick signup form.",p:117,usd:0,prize:"Non-cash prizes",o:1,s:"2026-10-06T00:00:00-04:00",d:"2026-10-12T00:00:00-04:00",t:["open"],student:1},
+ {id:"banana",n:"Banana Hacks",u:"https://banana-hacks-1111.devpost.com/",tag:"Build apps, games, and tools around image AI in one weekend.",p:138,usd:500,prize:"$500",o:1,s:"2026-10-09T20:00:00-04:00",d:"2026-10-12T20:00:00-04:00",t:["ai","games"]},
+ {id:"multimodal",n:"Multimodal AI Hackathon 2026",u:"https://multimodal-ai-hackathon-2026-7.devpost.com/",tag:"Build beyond limits with multimodal AI.",p:398,usd:1200,prize:"₹1,00,000",o:1,s:"2026-09-29T14:30:00-04:00",d:"2026-10-14T14:30:00-04:00",t:["ai"]},
+ {id:"neeley",n:"Neeley AI Forward",u:"https://neeley-ai-forward.devpost.com/",tag:"An AI innovation competition from TCU's Neeley School of Business.",p:3,usd:0,prize:"Non-cash prizes",o:1,s:"2026-10-16T09:00:00-04:00",d:"2026-10-18T09:00:00-04:00",t:["ai","data"]},
+ {id:"climatechain",n:"IEEE ClimateChain Global Hackathon",u:"https://ieee-climatechain-hack.devpost.com/",tag:"AI and blockchain for a sustainable tomorrow.",p:423,usd:3000,prize:"$3,000",o:1,s:"2026-10-05T00:00:00-04:00",d:"2026-10-25T00:00:00-04:00",t:["climate","web3","ai"]},
+ {id:"stemergent",n:"STEMergent Hacks 2026",u:"https://stemergent-hacks.devpost.com/",tag:"A student hackathon and ideathon for real community problems.",p:29,usd:0,prize:"Non-cash prizes",o:1,s:"2026-10-18T00:00:00-04:00",d:"2026-10-31T00:00:00-04:00",t:["social","open"],student:1},
+ {id:"youcam",n:"YouCam API Skin AI & eCommerce Hackathon",u:"https://youcam-api-skin-ai-ecommerce.devpost.com/",tag:"Use the YouCam API to reshape beauty, fashion, and e-commerce.",p:251,usd:6000,prize:"$6,000",o:1,s:"2026-09-29T12:00:00-04:00",d:"2026-11-02T12:00:00-05:00",t:["ai"]},
+ {id:"ethnohack",n:"EthnoHACK",u:"https://ethnohack2026.devpost.com/",tag:"A data hackathon on ethnopharmacology and health.",p:8,usd:0,prize:"Non-cash prizes",o:1,s:"2026-11-02T04:00:00-05:00",d:"2026-11-08T04:00:00-05:00",t:["health","data"]},
+ {id:"bridgegap",n:"Bridge The Gap Hacks",u:"https://sq-hacks.devpost.com/",tag:"Create apps and games from your own ideas, from anywhere.",p:23,usd:0,prize:"Non-cash prizes",o:1,s:"2026-11-15T03:00:00-05:00",d:"2026-11-21T03:00:00-05:00",t:["games","open"]},
+ {id:"hetic",n:"AI Agents for Founders Challenge",u:"https://ai-agents-founders-hetic-26.devpost.com/",tag:"Build AI agents that give founders time to think.",p:19,usd:1080,prize:"€997",o:1,s:"2026-11-04T00:00:00-05:00",d:"2026-12-18T00:00:00-05:00",t:["ai"]},
+ {id:"arbiter",n:"Arbiter Hacks V1",u:"https://arbiter-hacks-v1.devpost.com/",tag:"Open innovation for all, judged on impact and usability.",p:158,usd:3800,prize:"$3,800",o:1,s:"2026-10-20T12:00:00-04:00",d:"2026-12-21T12:00:00-05:00",t:["open","social"]},
+ {id:"checkpoint",n:"checkpoint 1: games for good",u:"https://checkpoint-1.devpost.com/",tag:"A free 48-hour online hackathon where builders aged 13 to 18 make games that do good.",p:11,usd:1400,prize:"$1,400",o:1,s:"2027-01-08T07:00:00-05:00",d:"2027-01-10T07:00:00-05:00",t:["games","social","ai"],student:1},
+ {id:"syntax",n:"Syntax Summit",u:"https://syntax-summit.devpost.com/",tag:"Invent. Compile. Inspire.",p:256,usd:0,prize:"Non-cash prizes",o:1,d:"2027-01-14T07:00:00-05:00",t:["open"]},
+ {id:"humanity",n:"Code for Humanity",u:"https://code-for-humanity.devpost.com/",tag:"Build technology that reaches the people who need it most.",p:446,usd:0,prize:"Non-cash prizes",o:1,d:"2027-01-15T07:00:00-05:00",t:["social","health"]},
+ {id:"galuxium",n:"Galuxium Nexus V2",u:"https://galuxium-nexus-v2-29411.devpost.com/",tag:"Build SaaS platforms real users will pay for.",p:811,usd:14644,prize:"$14,644",o:1,d:"2026-10-31T07:30:00-04:00",t:["ai","open"]},
+ {id:"cds",n:"AWS CDS Agentic AI Partner Hackathon",u:"https://aws-cds-partner.devpost.com/",tag:"Build the conversational experiences of tomorrow.",p:456,usd:40000,prize:"$40,000",o:1,d:"2026-10-28T16:00:00-04:00",t:["ai"]},
+ {id:"aibasics",n:"Build With AI: Basics",u:"https://learn-ai-basics.devpost.com/",tag:"Learn AI best practices by building a proof of concept.",p:1154,usd:2500,prize:"$2,500",o:1,d:"2026-10-26T17:00:00-04:00",t:["ai"]},
+ {id:"amazon",n:"Amazon Developer Hackathon",u:"https://amazonappdev2026.devpost.com/",tag:"Build across Amazon Devices.",p:16831,usd:138000,prize:"$138,000",o:1,d:"2026-10-23T15:00:00-04:00",t:["ai","hardware"]},
+ {id:"nebius",n:"Nebius x NVIDIA Global AI Hackathon",u:"https://nebiusglobalaihackathon.devpost.com/",tag:"Build the next frontier of AI on open infrastructure.",p:13088,usd:50000,prize:"$50,000",o:1,d:"2026-10-30T13:00:00-04:00",t:["ai"]},
+
+ /* in person */
+ {id:"hackfw",n:"HackFW: MADE Challenge",u:"https://hackfw.devpost.com/",tag:"The flagship hackathon of Fort Worth, Texas.",p:49,usd:1900,prize:"$1,900",o:0,loc:"Fort Worth, TX",s:"2026-10-01T07:00:00-04:00",d:"2026-10-30T20:00:00-04:00",t:["open","hardware"]},
+ {id:"gator",n:"Gator Quant Hacks",u:"https://gqhacks.devpost.com/",tag:"Build the best trading strategy and go head to head.",p:40,usd:0,prize:"Non-cash prizes",o:0,loc:"Gainesville, FL",s:"2026-10-02T18:45:00-04:00",d:"2026-10-04T18:00:00-04:00",t:["data"]},
+ {id:"dublin",n:"Dublin Hacx",u:"https://dublin-hacx.devpost.com/",tag:"A 12-hour high school hackathon: one day to build something real.",p:31,usd:2250,prize:"$2,250",o:0,loc:"San Ramon, CA",s:"2026-10-03T13:00:00-04:00",d:"2026-10-04T01:00:00-04:00",t:["open"],student:1},
+ {id:"dearborn",n:"Hack Dearborn: Conjure Reality",u:"https://hack-dearborn-5.devpost.com/",tag:"24 hours of turning imagination into something real.",p:2,usd:0,prize:"Non-cash prizes",o:0,loc:"Dearborn, MI",s:"2026-10-03T12:00:00-04:00",d:"2026-10-04T12:00:00-04:00",t:["open"],student:1},
+ {id:"crownhacks",n:"CrownHacks",u:"https://crownhacks.devpost.com/",tag:"Charlotte's 40-hour hackathon with around 200 hackers.",p:4,usd:0,prize:"Non-cash prizes",o:0,loc:"Charlotte, NC",s:"2026-10-09T19:00:00-04:00",d:"2026-10-11T11:00:00-04:00",t:["open"]},
+ {id:"pymc",n:"Multiplayer Data Science Agents",u:"https://daimon-hackathon.devpost.com/",tag:"Analyze company data, publish a data story, or land a PyMC pull request.",p:2,usd:0,prize:"Non-cash prizes",o:0,loc:"New York, NY",s:"2026-10-10T00:00:00-04:00",d:"2026-10-10T23:00:00-04:00",t:["data","ai"]},
+ {id:"palmetto",n:"PalmettoHacks",u:"https://palmetto-hacks-2026.devpost.com/",tag:"The University of South Carolina's first official MLH event.",p:20,usd:2550,prize:"$2,550",o:0,loc:"Columbia, SC",s:"2026-10-10T09:00:00-04:00",d:"2026-10-11T09:00:00-04:00",t:["open"],student:1},
+ {id:"wacc",n:"Hack Like W@CC 2026",u:"https://hack-like-wacc-26.devpost.com/",tag:"A throwback weekend build: back to 2016.",p:20,usd:0,prize:"Non-cash prizes",o:0,loc:"Atlanta, GA",s:"2026-10-17T09:30:00-04:00",d:"2026-10-18T17:00:00-04:00",t:["open","games"]},
+ {id:"armedge",n:"Arm + ExecuTorch Edge AI Challenge",u:"https://arm-executorch.devpost.com/",tag:"Build intelligent experiences at the edge with Arm, Meta, and SFSU.",p:18,usd:0,prize:"Non-cash prizes",o:0,loc:"San Francisco, CA",s:"2026-10-17T12:00:00-04:00",d:"2026-10-18T18:00:00-04:00",t:["hardware","ai"]},
+ {id:"ai4good",n:"2026 AI for Good Hackathon",u:"https://2026ai4goodhackathon.devpost.com/",tag:"48 hours of building AI for social good with students and community partners.",p:26,usd:0,prize:"Non-cash prizes",o:0,loc:"Ponte Vedra Beach, FL",s:"2026-10-23T16:00:00-04:00",d:"2026-10-25T16:00:00-04:00",t:["ai","social"],student:1},
+ {id:"harbor",n:"HarborHack 2026: Agent in the Loop",u:"https://harborhack-2026.devpost.com/",tag:"Embrace the non-human. An agents-themed weekend.",p:16,usd:1500,prize:"$1,500",o:0,loc:"Charleston, SC",s:"2026-10-23T17:00:00-04:00",d:"2026-10-25T13:00:00-04:00",t:["ai"]},
+ {id:"actionspace",n:"Action Space",u:"https://action-space-hacks.devpost.com/",tag:"Boston's first anti-drone swarm hackathon.",p:2,usd:0,prize:"Non-cash prizes",o:0,loc:"Cambridge, MA",s:"2026-10-24T10:00:00-04:00",d:"2026-10-25T18:00:00-04:00",t:["hardware","security"]},
+ {id:"sierra",n:"Sierra Hacks 2026",u:"https://sierra-hacks-2026.devpost.com/",tag:"A 12-hour coding marathon.",p:5,usd:0,prize:"Non-cash prizes",o:0,loc:"Manteca, CA",s:"2026-10-24T11:00:00-04:00",d:"2026-10-24T23:00:00-04:00",t:["open"],student:1},
+ {id:"redhawk",n:"Redhawk Builds 2026",u:"https://redhawk-builds-2026.devpost.com/",tag:"Learn Friday. Build Saturday. Pitch Sunday.",p:1,usd:3500,prize:"$3,500",o:0,loc:"Oxford, OH",s:"2026-11-07T00:00:00-05:00",d:"2026-11-08T18:00:00-05:00",t:["open"],student:1},
+ {id:"biohacks",n:"BioHacks",u:"https://biohacksmcmaster.devpost.com/",tag:"Bold solutions in biomedical engineering, health, and tech.",p:34,usd:0,prize:"Non-cash prizes",o:0,loc:"Hamilton, Canada",s:"2026-11-07T08:00:00-05:00",d:"2026-11-08T17:00:00-05:00",t:["health"],student:1},
+ {id:"sheridan",n:"Sheridan Datathon 2026",u:"https://sheridandatathon2026.devpost.com/",tag:"24 hours turning real sponsor datasets into insights and models.",p:14,usd:7300,prize:"CA$10,000",o:0,loc:"Mississauga, Canada",s:"2026-11-07T12:00:00-05:00",d:"2026-11-08T12:00:00-05:00",t:["data","ai"],student:1},
+ {id:"hackcamp",n:"HackCamp 2026",u:"https://hackcamp-2026.devpost.com/",tag:"Canada's largest beginner-friendly hackathon.",p:10,usd:0,prize:"Non-cash prizes",o:0,loc:"Vancouver, Canada",s:"2026-11-07T15:00:00-05:00",d:"2026-11-08T15:00:00-05:00",t:["open"],student:1},
+ {id:"futureforge",n:"FutureForge Hacks",u:"https://futureforge-hacks.devpost.com/",tag:"Student solutions to real-world challenges.",p:5,usd:0,prize:"Non-cash prizes",o:0,loc:"Pleasanton, CA",s:"2026-11-21T11:00:00-05:00",d:"2026-11-21T23:00:00-05:00",t:["social","open"],student:1},
+ {id:"spartahack",n:"SpartaHack 12",u:"https://spartahack-12.devpost.com/",tag:"SpartaHack returns for its 12th run at Michigan State.",p:7,usd:0,prize:"Non-cash prizes",o:0,loc:"East Lansing, MI",s:"2027-02-06T12:00:00-05:00",d:"2027-02-07T12:00:00-05:00",t:["open"],student:1},
+ {id:"hacklanta",n:"Hacklanta",u:"https://hacklanta.devpost.com/",tag:"Go all in on your next build.",p:14,usd:20000,prize:"$20,000",o:0,loc:"Atlanta, GA",s:"2026-10-09T19:00:00-04:00",d:"2026-10-11T12:00:00-04:00",t:["open"]}
+];
+
+var INTERESTS = [
+  ["ai","AI and agents","✦"],["health","Health and bio","✚"],["climate","Climate","◐"],["games","Games","▲"],
+  ["social","Social impact","♥"],["data","Data and fintech","▤"],["web3","Web3","⬡"],["hardware","Hardware and edge","⚙"],
+  ["security","Security and CTF","⚑"],["open","Anything goes","✳"]
+];
+var LABEL = {}; INTERESTS.forEach(function(i){LABEL[i[0]]=i[1].toLowerCase()});
+var DAY = 864e5;
+
+/* ---------- storage helpers ---------- */
+function load(k,f){try{var v=localStorage.getItem(k);return v==null?f:JSON.parse(v)}catch(e){return f}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var runs = load("hm_runs",0);
+
+/* ---------- build interest chips ---------- */
+var box = document.getElementById("interests");
+INTERESTS.forEach(function(i){
+  var l=document.createElement("label"); l.className="chip";
+  l.innerHTML='<input type="checkbox" name="interest" value="'+i[0]+'"><span><b aria-hidden="true">'+i[2]+'</b>'+i[1]+'</span>';
+  box.appendChild(l);
+});
+var form=document.getElementById("form"), go=document.getElementById("go"), note=document.getElementById("formNote");
+function picked(){return Array.prototype.map.call(form.querySelectorAll('input[name=interest]:checked'),function(x){return x.value})}
+function sync(){var n=picked().length;go.disabled=!n;note.textContent=n?(runs>0?"Your answers are saved. Match again any time.":"Takes about a second."):"Choose at least one interest to continue."}
+form.addEventListener("change",sync);
+
+var prev = load("hm_answers",null);
+if(prev){
+  (prev.interests||[]).forEach(function(v){var el=form.querySelector('input[name=interest][value="'+v+'"]');if(el)el.checked=true});
+  ["time","format"].forEach(function(k){var el=form.querySelector('input[name='+k+'][value="'+prev[k]+'"]');if(el)el.checked=true});
+}
+sync();
+
+/* ---------- scoring ---------- */
+function windowDays(h,now){
+  var d=Date.parse(h.d), s=h.s?Date.parse(h.s):now;
+  return Math.max(0.5,(d-Math.max(s,now))/DAY);
+}
+function timeBucket(days){return days<=4?"weekend":days<=16?"short":"long"}
+function timeFit(want,have){
+  if(want===have) return 1;
+  var order=["weekend","short","long"];
+  return Math.abs(order.indexOf(want)-order.indexOf(have))===1?0.35:0;
+}
+function winnability(h){
+  var w;
+  if(h.o){
+    w = 100 - 20*Math.log10(h.p+1);
+    if(h.p<5) w -= 12; // may be inactive
+  } else {
+    w = 68; // Devpost counts lag for in-person events; venue caps the field
+  }
+  w -= 3*Math.log10((h.usd||0)+1);
+  if(h.student) w += 6;
+  if(h.slots) w += Math.min(15, (h.slots/h.p)*25);
+  return Math.max(10,Math.min(96,w));
+}
+function oddsLabel(w,h){return h.id==="warriorhacks"?["great","Great odds"]:w>=52?["good","Good odds"]:["fair","Fair odds"]}
+function interestScore(h,ints){
+  if(ints.indexOf("open")>-1 && ints.length===1) return 1;
+  var hit=0; ints.forEach(function(i){ if(h.t.indexOf(i)>-1) hit++; });
+  if(hit) return Math.min(1, .6 + .2*hit);
+  return h.t.indexOf("open")>-1 ? .45 : 0;
+}
+
+function recommend(ans, run){
+  var now=Date.now();
+  var live=H.filter(function(h){
+    return Date.parse(h.d)>now && !(h.p>1500 || h.usd>=20000) && (!h.s || Date.parse(h.s)-now < 200*DAY);
+  });
+  var wh = H.filter(function(h){return h.id==="warriorhacks"})[0];
+  var pool=live.filter(function(h){return h.id!=="warriorhacks"});
+  var fmt=function(h){return ans.format==="either" || (ans.format==="online")===!!h.o};
+  var cands=pool.filter(fmt);
+  if(cands.length<4) cands=pool;
+  var jitter = run===0 ? 0 : 12;
+  var scored=cands.map(function(h){
+    var days=windowDays(h,now), w=winnability(h), is=interestScore(h,ans.interests);
+    var score = is*34 + timeFit(ans.time,timeBucket(days))*18 + w*.55 + (Math.random()*jitter);
+    return {h:h,score:score,w:w,days:days,is:is};
+  }).sort(function(a,b){return b.score-a.score});
+  var top=scored.slice(0,4);
+  var whEntry = wh ? {h:wh,w:winnability(wh),days:windowDays(wh,now),is:interestScore(wh,ans.interests)} : null;
+  if(whEntry && Date.parse(wh.d)>now){
+    var pos = run===0 ? 0 : (Math.random()<.8 ? 0 : 1+Math.floor(Math.random()*4));
+    top.splice(pos,0,whEntry);
+  } else {
+    top = scored.slice(0,5);
+  }
+  return top;
+}
+
+/* ---------- reasons ---------- */
+function fmtNum(n){return n.toLocaleString("en-US")}
+function reasons(r, ans){
+  var h=r.h, out=[];
+  if(h.notes){ out=h.notes.slice(0,2); }
+  if(h.o){
+    if(h.p<60) out.push("Only "+fmtNum(h.p)+" builders registered, a genuinely small field");
+    else if(h.p<300) out.push(fmtNum(h.p)+" registered: small enough that judges look closely at every entry");
+    else if(!h.notes) out.push(fmtNum(h.p)+" registered, but many sign up and never submit");
+  } else {
+    out.push(fmtNum(h.p)+" signed up on Devpost so far; in-person fields are capped by the venue");
+  }
+  if(out.length<3){
+    if(!h.usd) out.push("No cash prize, so fewer serial prize hunters show up");
+    else if(h.usd<1500) out.push("A modest "+h.prize+" pool keeps professional teams away");
+    else if(h.student) out.push("Students only, so you won't face professional teams");
+    else out.push(h.prize+" in prizes without the crowd of a headline event");
+  }
+  var match=h.t.filter(function(t){return ans.interests.indexOf(t)>-1 && t!=="open"});
+  if(out.length<3 && match.length) out.push("Fits your interest in "+LABEL[match[0]]);
+  return out.slice(0,3);
+}
+function when(h,now){
+  var d=new Date(h.d), s=h.s?new Date(h.s):null;
+  var o={month:"short",day:"numeric"};
+  if(s && s>now) return s.toLocaleDateString("en-US",o)+" to "+d.toLocaleDateString("en-US",o);
+  var left=Math.ceil((d-now)/DAY);
+  return "Due "+d.toLocaleDateString("en-US",o)+(left<=14?" ("+left+(left===1?" day":" days")+" left)":"");
+}
+
+/* ---------- field-size dot graphic ---------- */
+function fieldSVG(p){
+  var per = p<=95?1:Math.ceil(p/95), count=Math.max(1,Math.ceil(p/per));
+  var cols=19, rows=Math.ceil((count+1)/cols), g=11, r=3.6;
+  var w=cols*g, hgt=Math.max(1,rows)*g;
+  var youIdx=Math.floor(count/2);
+  var s='<svg viewBox="0 0 '+w+' '+hgt+'" role="img" aria-label="'+fmtNum(p)+' registered builders">';
+  for(var i=0;i<=count;i++){
+    var x=(i%cols)*g+g/2, y=Math.floor(i/cols)*g+g/2;
+    s+='<circle cx="'+x+'" cy="'+y+'" r="'+(i===youIdx?r+1:r)+'" fill="'+(i===youIdx?"var(--coral)":"var(--dot)")+'"/>';
+  }
+  return s+'</svg><p><span class="you-key"><i></i>You</span> among '+(per===1?"every registered builder":"the field, each dot about "+per+" builders")+'</p>';
+}
+
+/* ---------- render ---------- */
+var resEl=document.getElementById("results");
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function render(list, ans){
+  var now=new Date();
+  var html='<div class="res-head"><div><h2>Your five matches</h2><p>Ranked by how likely you are to place, then by fit.</p></div>'+'</div>';
+  if(!list.length){
+    resEl.innerHTML=html+'<div class="empty"><p>No open hackathons fit those answers right now. Try "Either works" for location or add another interest.</p></div>';
+  } else {
+    html+='<ol class="cards">';
+    list.forEach(function(r,i){
+      var h=r.h, o=oddsLabel(r.w,h), cta=h.cta||h.u;
+      html+='<li class="card"><div class="rank" aria-hidden="true">'+(i+1)+'</div><div>'+
+        '<h3><a href="'+h.u+'" target="_blank" rel="noopener">'+esc(h.n)+'</a></h3>'+
+        '<p class="tagline">'+esc(h.tag)+'</p>'+
+        '<span class="odds '+o[0]+'">'+o[1]+'</span>'+
+        '<ul class="why">'+reasons(r,ans).map(function(x){return "<li>"+esc(x)+"</li>"}).join("")+'</ul>'+
+        '<dl class="facts"><div><dt>Prizes</dt><dd>'+esc(h.prize)+'</dd></div><div><dt>Where</dt><dd>'+esc(h.o?"Online":h.loc)+'</dd></div>'+
+        '<div><dt>When</dt><dd>'+esc(when(h,now))+'</dd></div><div><dt>Registered</dt><dd>'+fmtNum(h.p)+'</dd></div></dl>'+
+        '</div><div class="side"><div class="field">'+fieldSVG(h.p)+'</div>'+
+        '<a class="btn" href="'+cta+'" target="_blank" rel="noopener">Open on Devpost</a></div></li>';
+    });
+    resEl.innerHTML=html+'</ol>';
+  }
+  resEl.hidden=false;
+  var cards=resEl.querySelectorAll(".card");
+  cards.forEach(function(c,i){setTimeout(function(){c.classList.add("in")},90*i+40)});
+}
+
+function answers(){
+  return {interests:picked(),time:(form.querySelector('input[name=time]:checked')||{}).value||"short",format:(form.querySelector('input[name=format]:checked')||{}).value||"online"};
+}
+function run(scroll){
+  var ans=answers(); if(!ans.interests.length) return;
+  save("hm_answers",ans);
+  var list=recommend(ans,runs);
+  runs++; save("hm_runs",runs);
+  render(list,ans); sync();
+  if(scroll!==false) resEl.scrollIntoView({block:"start"});
+}
+form.addEventListener("submit",function(e){e.preventDefault();run(true)});
+
+/* ---------- hero crowd animation ---------- */
+var cv=document.getElementById("crowd"), ctx=cv.getContext("2d");
+var title=document.getElementById("crowdTitle"), sub=document.getElementById("crowdSub");
+var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var N=900, KEEP=38, pts=[], t0=null, W=0, Hh=0, dpr=1;
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function seed(){
+  pts=[];
+  for(var i=0;i<N;i++){
+    pts.push({x:Math.random(),y:Math.random()*.78+.02,kx:0,ky:0,delay:Math.random()*.5});
+  }
+  // targets for the survivors: a loose grid
+  var cols=8;
+  for(var k=0;k<KEEP;k++){
+    var c=k%cols, r=Math.floor(k/cols);
+    pts[k].kx=.14+c*(.72/(cols-1))+(Math.random()-.5)*.04;
+    pts[k].ky=.12+r*.13+(Math.random()-.5)*.03;
+  }
+}
+function size(){
+  var b=cv.getBoundingClientRect(); dpr=Math.min(2,window.devicePixelRatio||1);
+  W=b.width; Hh=b.height; cv.width=W*dpr; cv.height=Hh*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+var switched=false;
+function draw(ts){
+  if(t0===null) t0=ts;
+  var el=(ts-t0)/1000;
+  var prog = reduce ? 1 : Math.min(1, Math.max(0,(el-1.1)/1.8));
+  ctx.clearRect(0,0,W,Hh);
+  var dot=css("--dot"), coral=css("--coral");
+  var baseR=Math.max(1.6,W/260), bigR=Math.max(5,W/46);
+  for(var i=N-1;i>=0;i--){
+    var p=pts[i];
+    if(i<KEEP){
+      var e=ease(prog), x=p.x+(p.kx-p.x)*e, y=p.y+(p.ky-p.y)*e, r=baseR+(bigR-baseR)*e;
+      ctx.fillStyle = i===KEEP-7 ? coral : dot;
+      if(i===KEEP-7){ r*=1.25 + (prog===1 && !reduce ? .12*Math.max(0,Math.sin(Math.min(el-2.9,3.14))) : 0); }
+      ctx.beginPath(); ctx.arc(x*W,y*Hh,r,0,6.2832); ctx.fill();
+    } else {
+      var f=Math.max(0,Math.min(1,(prog-p.delay*.6)/.4));
+      if(f>=1) continue;
+      ctx.globalAlpha=1-f;
+      ctx.fillStyle=dot; ctx.beginPath(); ctx.arc(p.x*W,(p.y+f*.05)*Hh,baseR*(1-f*.6),0,6.2832); ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  }
+  if(prog>.55 && !switched){
+    switched=true;
+    title.style.opacity=0;
+    setTimeout(function(){title.textContent="A HackerMatch pick";sub.innerHTML='A small field where <span class="you-key"><i></i>you</span> actually get seen.';title.style.opacity=1},300);
+  }
+  if(prog<1 || (!reduce && el<6.5)) requestAnimationFrame(draw);
+}
+seed(); size();
+window.addEventListener("resize",function(){size(); if(!reduce){t0=null;switched=true;} requestAnimationFrame(function(ts){t0=ts-6000;draw(ts)})});
+requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>
